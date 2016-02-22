@@ -1,6 +1,8 @@
 django-newrelic-extensions
 ==========================
 
+Updated to work with Python3
+
 This package provides a Django middleware class that attaches custom attributes
 to the stack trace that the New Relic agent sends to your console.  For
 example, if a server error occurs you may wish to know the username of the user
