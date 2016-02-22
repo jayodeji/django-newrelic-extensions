@@ -6,18 +6,19 @@ class NewRelicMiddleware(object):
 
     def debug(self, message):
         if self.debug_enabled:
-            print '[new relic extensions]: %s' % message
+            msg = '[new relic extensions]: %s' % message
+            print(msg)
 
     def add(self, key, value):
         if callable(value):
             value = value()
         if self.debug_enabled:
-            print '%s: %s' % (key, value)
+            msg = '%s: %s' % (key, value)
+            print(msg)
         else:
             newrelic.agent.add_custom_parameter(key, value)
 
     def process_response(self, request, response):
-
         enabled = getattr(settings, 'NEW_RELIC_EXTENSIONS_ENABLED', False)
         if not enabled:
             return response
@@ -31,21 +32,28 @@ class NewRelicMiddleware(object):
 
         for key in attributes.keys():
 
-            value = getattr(request, key, None)
-            if not value:
-                self.debug("HttpRequest instance doesn't have '%s' attribute."
-                        % key)
+            request_attr = getattr(request, key, None)
+            if not request_attr:
+                msg = "HttpRequest instance doesn't have '%s' attribute." % key
+                self.debug(msg)
                 continue
 
             if isinstance(attributes[key], dict):
                 for subkey in attributes[key].keys():
-                    subvalue = getattr(value, subkey, None)
+                    #if request is a dict, get the value one way, otherwise use getattr
+                    if isinstance(request_attr, dict):
+                        subvalue = request_attr.get(subkey, None)
+                    else:
+                        subvalue = getattr(request_attr, subkey, None)
                     if not subvalue:
-                        self.debug("'%s' doesn't have '%s' attribute." % (key,
-                            subkey))
+                        msg = "'%s' doesn't have '%s' attribute." % (key, subkey)
+                        self.debug(msg)
                         continue
                     self.add(attributes[key][subkey], subvalue)
             else:
-                self.add(attributes[key], value)
+                self.add(attributes[key], request_attr)
 
         return response
+
+
+
