@@ -6,7 +6,7 @@ long_desc = open('README.rst').read()
 
 setup(
     name='django-newrelic-extensions',
-    version='0.0.1',
+    version='1.0.0',
     install_requires=[
         'newrelic'
     ],
